@@ -1,6 +1,9 @@
 import asyncio
+import logging
 
 from scanner import Scanner
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 async def run():
