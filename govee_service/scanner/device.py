@@ -22,6 +22,7 @@ class Device:
         self._model = get_govee_model(device.name)
         if advertisement:
             self.update(device, advertisement)
+        _LOGGER.debug(f"{device} {device.rssi}")
 
     @property
     def address(self) -> str:
