@@ -68,8 +68,9 @@ def log_advertisement_message(
         advertisement: AdvertisementData
 ) -> None:
     """Log an advertisement message from a BLE device."""
+    _LOGGER.info('Device advertised')
     if get_govee_model(device.name) and advertisement.manufacturer_data:
-        _LOGGER.debug(
+        _LOGGER.info(
             "Advertisement message from %s (name=%s): %s",
             device.address,
             device.name,
