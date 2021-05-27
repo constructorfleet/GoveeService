@@ -5,7 +5,7 @@ from bleak import BleakClient
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 
-from govee_service.scanner import Device
+from .device import Device
 
 _LOGGER = logging.getLogger(__name__)
 
