@@ -47,7 +47,7 @@ class Scanner:
              data: Dict) -> None:
         """Run all callbacks for an event."""
         for listener in self._listeners.get(event_name, []):
-            if inspect.isawaitable(listener):
+            if inspect.iscoroutinefunction(listener):
                 asyncio.get_event_loop().create_task(listener(data))
             else:
                 listener(data)
