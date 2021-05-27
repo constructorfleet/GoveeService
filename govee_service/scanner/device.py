@@ -101,26 +101,22 @@ class LedDevice(Device):
         return self._on
 
     async def turn_on(self) -> None:
-        await send(self,
-                   self.COMMAND_POWER,
-                   [0x1])
+        await self._send(self.COMMAND_POWER,
+                         [0x1])
 
     async def turn_off(self) -> None:
-        await send(self,
-                   self.COMMAND_POWER,
-                   [0x0])
+        await self._send(self.COMMAND_POWER,
+                         [0x0])
 
     async def set_color(self,
                         color: Tuple[int, int, int]) -> None:
-        await send(self,
-                   self.COMMAND_COLOR,
-                   [self.MANUAL_COLOR, *color])
+        await self._send(self.COMMAND_COLOR,
+                         [self.MANUAL_COLOR, *color])
 
     async def set_brightness(self,
                              brightness: int) -> None:
-        await send(self,
-                   self.COMMAND_BRIGHTNESS,
-                   [round((brightness / 100) * 0xFF)])
+        await self._send(self.COMMAND_BRIGHTNESS,
+                         [round((brightness / 100) * 0xFF)])
 
     def update(self, device: BLEDevice,
                advertisement: AdvertisementData) -> None:
