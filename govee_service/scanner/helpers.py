@@ -1,11 +1,8 @@
 import logging
-from typing import Optional, Union, List
+from typing import Optional
 
-from bleak import BleakClient
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
-
-from .device import Device
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,26 +40,6 @@ def brightness_hex(brightness: int) -> str:
     bins = [51, 4, brightness, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, sig]
     bins_str = map(int_to_hex, bins)
     return "".join(bins_str)
-
-
-async def send(device: Device,
-               command: int,
-               payload: Union[bytes, List[int]]) -> None:
-    cmd = command & 0xFF
-    payload = bytes(payload)
-    frame = bytes([0x33, cmd]) + bytes(payload)
-    # pad frame data to 19 bytes (plus checksum)
-    frame += bytes([0] * (19 - len(frame)))
-
-    # The checksum is calculated by XORing all data bytes
-    checksum = 0
-    for b in frame:
-        checksum ^= b
-
-    frame += bytes([checksum & 0xFF])
-
-    async with BleakClient(device.address) as client:
-        await client.write_gatt_char('00010203-0405-0607-0809-0a0b0c0d2b11', frame)
 
 
 # def decode_temperature_and_humidity(data_packet: bytes) -> Tuple[float, float]:

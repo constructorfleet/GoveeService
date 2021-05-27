@@ -1,10 +1,11 @@
 import logging
-from typing import Optional, Set, Tuple, Type
+from typing import Optional, Set, Tuple, Type, Union, List
 
+from bleak import BleakClient
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 
-from .helpers import get_govee_model, send
+from .helpers import get_govee_model
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,6 +55,26 @@ class Device:
         if self._device != device:
             self._device = device
 
+    async def _send(self,
+                    command: int,
+                    payload: Union[bytes, List[int]]) -> None:
+
+        cmd = command & 0xFF
+        payload = bytes(payload)
+        frame = bytes([0x33, cmd]) + bytes(payload)
+        # pad frame data to 19 bytes (plus checksum)
+        frame += bytes([0] * (19 - len(frame)))
+
+        # The checksum is calculated by XORing all data bytes
+        checksum = 0
+        for b in frame:
+            checksum ^= b
+
+        frame += bytes([checksum & 0xFF])
+
+        async with BleakClient(self.address) as client:
+            await client.write_gatt_char('00010203-0405-0607-0809-0a0b0c0d2b11', frame)
+
 
 class LedDevice(Device):
     SUPPORTED_MODELS = {"H6170"}
@@ -99,7 +120,7 @@ class LedDevice(Device):
                              brightness: int) -> None:
         await send(self,
                    self.COMMAND_BRIGHTNESS,
-                   [round((brightness/100) * 0xFF)])
+                   [round((brightness / 100) * 0xFF)])
 
     def update(self, device: BLEDevice,
                advertisement: AdvertisementData) -> None:
