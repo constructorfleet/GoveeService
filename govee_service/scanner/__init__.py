@@ -42,13 +42,13 @@ class Scanner:
 
         return unsubscribe
 
-    async def emit(self,
-                   event_name: str,
-                   data: Dict) -> None:
+    def emit(self,
+             event_name: str,
+             data: Dict) -> None:
         """Run all callbacks for an event."""
         for listener in self._listeners.get(event_name, []):
             if inspect.isawaitable(listener):
-                await listener(data)
+                asyncio.get_event_loop().create_task(listener(data))
             else:
                 listener(data)
 
@@ -64,7 +64,7 @@ class Scanner:
                 known_device.update(
                     device=device,
                     advertisement=advertisement)
-                await self.emit(
+                self.emit(
                     device.address,
                     {"device": known_device})
             else:
@@ -74,7 +74,7 @@ class Scanner:
                 )
                 if known_device:
                     self._known_devices[device.address] = known_device
-                    await self.emit(
+                    self.emit(
                         DEVICE_DISCOVERED,
                         {"device": known_device})
 
