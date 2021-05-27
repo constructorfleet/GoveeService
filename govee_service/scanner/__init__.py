@@ -52,6 +52,7 @@ class Scanner:
         def _callback(device: BLEDevice,
                       advertisement: AdvertisementData) -> None:
             _LOGGER.info("Detected")
+            print("DETECTED")
             log_advertisement_message(
                 device,
                 advertisement)
@@ -74,8 +75,10 @@ class Scanner:
                         DEVICE_DISCOVERED,
                         {"device": known_device})
         _LOGGER.info("Register callback")
+        print("REGISTER CALLBACK")
         self.__scanner.register_detection_callback(_callback)
         _LOGGER.info("Scanning")
+        print("SCANNING")
         await self.__scanner.start()
 
     async def stop(self) -> None:
