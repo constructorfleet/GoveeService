@@ -5,7 +5,7 @@ from bleak import BleakClient
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 
-from .helpers import get_govee_model
+from .helpers import get_govee_model, rgb_hex, brightness_hex
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,20 +60,20 @@ class Device:
                     payload: Union[bytes, List[int]]) -> None:
 
         cmd = command & 0xFF
-        payload = bytes(payload)
-        frame = bytes([0x33, cmd]) + bytes(payload)
-        # pad frame data to 19 bytes (plus checksum)
-        frame += bytes([0] * (19 - len(frame)))
-
-        # The checksum is calculated by XORing all data bytes
-        checksum = 0
-        for b in frame:
-            checksum ^= b
-
-        frame += bytes([checksum & 0xFF])
+        # payload = bytes(payload)
+        # frame = bytes([0x33, cmd]) + bytes(payload)
+        # # pad frame data to 19 bytes (plus checksum)
+        # frame += bytes([0] * (19 - len(frame)))
+        #
+        # # The checksum is calculated by XORing all data bytes
+        # checksum = 0
+        # for b in frame:
+        #     checksum ^= b
+        #
+        # frame += bytes([checksum & 0xFF])
 
         async with BleakClient(self.address) as client:
-            await client.write_gatt_char(20, frame)
+            await client.write_gatt_char(20, bytes(payload))
 
 
 class LedDevice(Device):
@@ -111,12 +111,12 @@ class LedDevice(Device):
     async def set_color(self,
                         color: Tuple[int, int, int]) -> None:
         await self._send(self.COMMAND_COLOR,
-                         [self.MANUAL_COLOR, *color])
+                         rgb_hex(*color))
 
     async def set_brightness(self,
                              brightness: int) -> None:
         await self._send(self.COMMAND_BRIGHTNESS,
-                         [round((brightness / 100) * 0xFF)])
+                         brightness_hex(brightness))
 
     def update(self, device: BLEDevice,
                advertisement: AdvertisementData) -> None:

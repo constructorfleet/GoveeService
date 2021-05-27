@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
@@ -28,18 +28,18 @@ def int_to_hex(val: int) -> str:
 
 def rgb_hex(red: int,
             green: int,
-            blue: int) -> str:
+            blue: int) -> List[int]:
     sig = (3 * 16 + 1) ^ red ^ green ^ blue
-    bins = [51, 5, 2, red, green, blue, 0, 255, 174, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, sig]
-    bins_str = map(int_to_hex, bins)
-    return "".join(bins_str)
+    return [51, 5, 2, red, green, blue, 0, 255, 174, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, sig]
+    # bins_str = map(int_to_hex, bins)
+    # return "".join(bins_str)
 
 
-def brightness_hex(brightness: int) -> str:
+def brightness_hex(brightness: int) -> List[int]:
     sig = (3 * 16 + 3) ^ 4 ^ brightness
-    bins = [51, 4, brightness, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, sig]
-    bins_str = map(int_to_hex, bins)
-    return "".join(bins_str)
+    return [51, 4, brightness, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, sig]
+    # bins_str = map(int_to_hex, bins)
+    # return "".join(bins_str)
 
 
 # def decode_temperature_and_humidity(data_packet: bytes) -> Tuple[float, float]:
