@@ -4,7 +4,7 @@ from typing import Optional, Set, Tuple, Type
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 
-from .helpers import get_govee_model
+from .helpers import get_govee_model, send
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,6 +57,11 @@ class Device:
 
 class LedDevice(Device):
     SUPPORTED_MODELS = {"H6170"}
+    COMMAND_POWER = 0x01
+    COMMAND_COLOR = 0x05
+    COMMAND_BRIGHTNESS = 0x04
+
+    MANUAL_COLOR = 0x02
 
     _brightness = 0
     _color = (0, 0, 0)
@@ -75,15 +80,26 @@ class LedDevice(Device):
         return self._on
 
     async def turn_on(self) -> None:
-        pass
+        await send(self,
+                   self.COMMAND_POWER,
+                   [0x1])
+
+    async def turn_off(self) -> None:
+        await send(self,
+                   self.COMMAND_POWER,
+                   [0x0])
 
     async def set_color(self,
                         color: Tuple[int, int, int]) -> None:
-        pass
+        await send(self,
+                   self.COMMAND_COLOR,
+                   [self.MANUAL_COLOR, *color])
 
     async def set_brightness(self,
                              brightness: int) -> None:
-        pass
+        await send(self,
+                   self.COMMAND_BRIGHTNESS,
+                   [round((brightness/100) * 0xFF)])
 
     def update(self, device: BLEDevice,
                advertisement: AdvertisementData) -> None:
