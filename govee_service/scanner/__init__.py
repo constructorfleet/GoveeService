@@ -29,7 +29,7 @@ class Scanner:
 
     def on(self,
            event_name: str,
-           callback: Callable[[], Dict]) -> Callable:
+           callback: Callable[[Dict], None]) -> Callable:
         """Register an event callback."""
         listeners: list = self._listeners.setdefault(event_name, [])
         listeners.append(callback)
