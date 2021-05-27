@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Union, Awaitable
 
 from bleak import BleakScanner
 from bleak.backends.device import BLEDevice
@@ -20,7 +21,7 @@ class Scanner:
     def __init__(self) -> None:
         """Initialize the scanner."""
         self.__scanner = BleakScanner()
-        self._listeners: Dict[str, List[Callable]] = {}
+        self._listeners: Dict[str, List[Union[Awaitable, Callable]]] = {}
         self._known_devices: Dict[str, Device] = {}
 
     @property
@@ -29,7 +30,7 @@ class Scanner:
 
     def on(self,
            event_name: str,
-           callback: Callable[[Dict], None]) -> Callable:
+           callback: Union[Awaitable, Callable]) -> Callable:
         """Register an event callback."""
         listeners: list = self._listeners.setdefault(event_name, [])
         listeners.append(callback)
@@ -41,12 +42,15 @@ class Scanner:
 
         return unsubscribe
 
-    def emit(self,
-             event_name: str,
-             data: Dict) -> None:
+    async def emit(self,
+                   event_name: str,
+                   data: Dict) -> None:
         """Run all callbacks for an event."""
         for listener in self._listeners.get(event_name, []):
-            listener(data)
+            if inspect.isawaitable(listener):
+                await listener(data)
+            else:
+                listener(data)
 
     async def start(self):
         def _callback(device: BLEDevice,
@@ -60,7 +64,7 @@ class Scanner:
                 known_device.update(
                     device=device,
                     advertisement=advertisement)
-                self.emit(
+                await self.emit(
                     device.address,
                     {"device": known_device})
             else:
@@ -70,9 +74,10 @@ class Scanner:
                 )
                 if known_device:
                     self._known_devices[device.address] = known_device
-                    self.emit(
+                    await self.emit(
                         DEVICE_DISCOVERED,
                         {"device": known_device})
+
         _LOGGER.info("Register callback")
         self.__scanner.register_detection_callback(_callback)
         _LOGGER.info("Scanning")
