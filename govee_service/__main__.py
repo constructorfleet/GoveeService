@@ -15,7 +15,7 @@ async def run():
     # scanner.on(DEVICE_DISCOVERED,
     #            color_callback)
     await scanner.start()
-    await asyncio.sleep(120)
+    await asyncio.sleep(30)
     await scanner.stop()
     await scanner.known_devices[0].set_color((255, 255, 255))
 
