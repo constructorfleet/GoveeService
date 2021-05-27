@@ -3,7 +3,7 @@ import logging
 
 from scanner import Scanner
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 async def run():

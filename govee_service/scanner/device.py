@@ -101,7 +101,7 @@ def determine_known_device(
     if model in MODEL_MAP:
         return MODEL_MAP[model](device, advertisement)
     elif model and advertisement.manufacturer_data:
-        _LOGGER.debug(
+        _LOGGER.warning(
             "%s appears to be a Govee %s, but no handler has been created",
             device.name,
             model,
