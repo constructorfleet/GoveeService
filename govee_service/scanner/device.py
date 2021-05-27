@@ -73,7 +73,7 @@ class Device:
         frame += bytes([checksum & 0xFF])
 
         async with BleakClient(self.address) as client:
-            await client.write_gatt_char('00010203-0405-0607-0809-0a0b0c0d2b11', frame)
+            await client.write_gatt_char(20, frame)
 
 
 class LedDevice(Device):
